@@ -19,18 +19,6 @@ export const venueDetailsType = defineType({
       validation: (rule) => rule.required().max(250),
     }),
     defineField({
-      name: 'city',
-      title: 'City',
-      type: 'string',
-      validation: (rule) => rule.max(80),
-    }),
-    defineField({
-      name: 'country',
-      title: 'Country',
-      type: 'string',
-      validation: (rule) => rule.max(80),
-    }),
-    defineField({
       name: 'mapUrl',
       title: 'Map URL',
       type: 'url',
