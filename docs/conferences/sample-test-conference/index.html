@@ -35,21 +35,35 @@
       <div class="shell">
         <header class="site-header">
           <a class="brand" href="/">MMG Conferences</a>
-          <div class="header-copy">
-            <p>Conference landing pages powered by Sanity</p>
-          </div>
+          <nav class="site-nav" aria-label="Conference sections">
+            <a href="#welcome">Welcome</a>
+            <a href="#committee">Committee</a>
+            <a href="#program">Program</a>
+            <a href="#speakers">Speakers</a>
+            <a href="#register">Register</a>
+            <a href="#venue">Venue</a>
+            <a href="#contact">Contact</a>
+          </nav>
         </header>
 
         <main class="app-shell">
           <section class="hero">
             <img class="hero-image" src="https://cdn.sanity.io/images/cfy1tt5s/production/0826195822b931328780ab9832fb815637c9a02f-5000x1581.jpg" alt="Banner Text" />
             <div class="hero-content">
+              <div class="hero-topline">
+                <span>April 30, 2026 - May 2, 2026</span>
+                <span>Test</span>
+              </div>
               <p class="eyebrow">Sample</p>
               <h1>Sample Test Conference</h1>
               <p class="hero-subheadline">Some Stuff and lorem ims</p>
+              <div class="hero-actions">
+                <a class="hero-action" href="https://meetingminds.eventsair.com/QuickEventWebsitePortal/ehc26/agenda/Portal/Closed" target="_blank" rel="noreferrer">Register Now</a>
+                <a class="hero-action" href="https://meetingminds.eventsair.com/QuickEventWebsitePortal/ehc26/agenda/Portal/Closed" target="_blank" rel="noreferrer">View Program</a>
+                
+              </div>
               <div class="hero-meta">
-                <span class="hero-pill">April 30, 2026 - May 2, 2026</span>
-                <span class="hero-pill">Test</span>
+                <span class="hero-pill">0+ Committee Members</span>
                 <span class="hero-pill">registrationOpen</span>
               </div>
             </div>
@@ -58,9 +72,9 @@
           <section class="content-grid">
             <div class="stack">
               
-                    <article class="card">
+                    <article class="card intro-card" id="welcome">
                       <p class="section-label">Welcome</p>
-                      <h2 class="section-title">A conference experience shaped around clear communication and real collaboration.</h2>
+                      <h2 class="section-title">Stay informed, prepared, and inspired.</h2>
                       <div class="richtext"><p>We invite you to mark your calendars for the Emirates Haematology Conference (EHC) 2026, taking place from 4–6 September 2026.
 
 This meeting serves as an international forum for haematologists and related professionals to come together in an environment focused on shared learning, clinical insight, and collaborative progress in haematology care. Our commitment is to support advancement in clinical practice, research, education, and public health. Through the collective efforts of our society and our partners, we aim to foster dialogue that connects global expertise with regional priorities and evolving patient needs.
@@ -73,6 +87,7 @@ At the core of this conference is a shared goal: to enhance access to high-quali
                     </article>
                   
 
+              <section class="section-block" id="program">
               
     <article class="card action-card">
       <p class="section-label">Program</p>
@@ -81,7 +96,9 @@ At the core of this conference is a shared goal: to enhance access to high-quali
       <a class="action-link" href="https://meetingminds.eventsair.com/QuickEventWebsitePortal/ehc26/agenda/Portal/Closed" target="_blank" rel="noreferrer">View Program</a>
     </article>
   
+              </section>
 
+              <section class="section-block" id="speakers">
               
     <article class="card action-card">
       <p class="section-label">Speakers</p>
@@ -90,7 +107,9 @@ At the core of this conference is a shared goal: to enhance access to high-quali
       <a class="action-link" href="https://meetingminds.eventsair.com/QuickEventWebsitePortal/ehc26/agenda/Portal/Closed" target="_blank" rel="noreferrer">View speakers</a>
     </article>
   
+              </section>
 
+              <section class="section-block" id="register">
               
     <article class="card action-card">
       <p class="section-label">Register</p>
@@ -99,7 +118,9 @@ At the core of this conference is a shared goal: to enhance access to high-quali
       <a class="action-link" href="https://meetingminds.eventsair.com/QuickEventWebsitePortal/ehc26/agenda/Portal/Closed" target="_blank" rel="noreferrer">Register Now</a>
     </article>
   
+              </section>
 
+              <section class="section-block" id="venue">
               
     <article class="card action-card">
       <p class="section-label">Venue</p>
@@ -108,12 +129,13 @@ At the core of this conference is a shared goal: to enhance access to high-quali
       
     </article>
   
+              </section>
 
               
             </div>
 
             <aside class="stack">
-              <article class="card">
+              <article class="card contact-card" id="contact">
                 <p class="section-label">Contact</p>
                 <h3 class="card-title">Conference contact</h3>
                 
@@ -123,8 +145,8 @@ At the core of this conference is a shared goal: to enhance access to high-quali
               </article>
 
               <article class="card speaker-banner">
-                <p class="section-label">Speaker Source</p>
-                <h3 class="card-title">External speaker source configured</h3>
+                <p class="section-label">Faculty Source</p>
+                <h3 class="card-title">External speaker feed</h3>
                 <p>
                   Provider: eventsAir
                   <br />Event ID: 4fcd784a-9c1b-4fdd-a84a-c72c353da8d9

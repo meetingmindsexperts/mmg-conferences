@@ -275,6 +275,11 @@ function renderSection(sectionLabel, title, description, ctaUrl, ctaLabel) {
   `
 }
 
+function renderQuickLink(href, label) {
+  if (!href) return ''
+  return `<a class="hero-action" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`
+}
+
 function renderConferencePage(conference, siteSettings, baseUrl) {
   const pagePath = `/conferences/${conference.slug}/`
   const pageUrl = buildAbsoluteUrl(baseUrl, pagePath)
@@ -303,9 +308,15 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
       <div class="shell">
         <header class="site-header">
           <a class="brand" href="/">${escapeHtml(siteSettings.siteTitle || 'MMG Conferences')}</a>
-          <div class="header-copy">
-            <p>${escapeHtml(siteSettings.siteDescription || 'Conference landing pages powered by Sanity')}</p>
-          </div>
+          <nav class="site-nav" aria-label="Conference sections">
+            <a href="#welcome">Welcome</a>
+            <a href="#committee">Committee</a>
+            <a href="#program">Program</a>
+            <a href="#speakers">Speakers</a>
+            <a href="#register">Register</a>
+            <a href="#venue">Venue</a>
+            <a href="#contact">Contact</a>
+          </nav>
         </header>
 
         <main class="app-shell">
@@ -316,12 +327,20 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 : ''
             }
             <div class="hero-content">
+              <div class="hero-topline">
+                ${conference.dateRange?.startDate ? `<span>${escapeHtml(formatDateRange(conference.dateRange))}</span>` : ''}
+                ${conference.venue?.name ? `<span>${escapeHtml(conference.venue.name)}</span>` : ''}
+              </div>
               ${conference.heroText?.eyebrow ? `<p class="eyebrow">${escapeHtml(conference.heroText.eyebrow)}</p>` : ''}
               <h1>${escapeHtml(conference.heroText?.headline || conference.title || 'Conference')}</h1>
               ${conference.heroText?.subheadline ? `<p class="hero-subheadline">${escapeHtml(conference.heroText.subheadline)}</p>` : ''}
+              <div class="hero-actions">
+                ${renderQuickLink(conference.registration?.url, conference.registration?.ctaLabel || 'Register')}
+                ${renderQuickLink(conference.program?.url, conference.program?.ctaLabel || 'View Program')}
+                ${renderQuickLink(conference.venue?.mapUrl, conference.venue?.ctaLabel || 'View Venue')}
+              </div>
               <div class="hero-meta">
-                ${formatDateRange(conference.dateRange) ? `<span class="hero-pill">${escapeHtml(formatDateRange(conference.dateRange))}</span>` : ''}
-                ${conference.venue?.name ? `<span class="hero-pill">${escapeHtml(conference.venue.name)}</span>` : ''}
+                <span class="hero-pill">${conference.committee?.length || 0}+ Committee Members</span>
                 ${conference.status ? `<span class="hero-pill">${escapeHtml(conference.status)}</span>` : ''}
               </div>
             </div>
@@ -332,15 +351,16 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
               ${
                 conference.welcomeRemarks?.length
                   ? `
-                    <article class="card">
+                    <article class="card intro-card" id="welcome">
                       <p class="section-label">Welcome</p>
-                      <h2 class="section-title">A conference experience shaped around clear communication and real collaboration.</h2>
+                      <h2 class="section-title">Stay informed, prepared, and inspired.</h2>
                       <div class="richtext">${blocksToHtml(conference.welcomeRemarks)}</div>
                     </article>
                   `
                   : ''
               }
 
+              <section class="section-block" id="program">
               ${renderSection(
                 'Program',
                 conference.program?.title || 'Program',
@@ -348,7 +368,9 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 conference.program?.url,
                 conference.program?.ctaLabel || 'View program',
               )}
+              </section>
 
+              <section class="section-block" id="speakers">
               ${renderSection(
                 'Speakers',
                 conference.speakerSource?.title || 'Speakers',
@@ -356,7 +378,9 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 conference.speakerSource?.feedUrl,
                 conference.speakerSource?.ctaLabel || 'View speakers',
               )}
+              </section>
 
+              <section class="section-block" id="register">
               ${renderSection(
                 'Register',
                 conference.registration?.title || 'Register',
@@ -364,7 +388,9 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 conference.registration?.url,
                 conference.registration?.ctaLabel || 'Register now',
               )}
+              </section>
 
+              <section class="section-block" id="venue">
               ${renderSection(
                 'Venue',
                 conference.venue?.title || conference.venue?.name || 'Venue',
@@ -372,13 +398,14 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 conference.venue?.mapUrl,
                 conference.venue?.ctaLabel || 'View map',
               )}
+              </section>
 
               ${
                 organizingCommittee.length || scientificCommittee.length
                   ? `
-                    <article class="card">
+                    <article class="card committee-panel" id="committee">
                       <p class="section-label">Committee</p>
-                      <h3 class="section-title">Leadership and scientific guidance</h3>
+                      <h3 class="section-title">Conference Committee</h3>
                       <div class="stack">
                         ${
                           organizingCommittee.length
@@ -412,7 +439,7 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
             </div>
 
             <aside class="stack">
-              <article class="card">
+              <article class="card contact-card" id="contact">
                 <p class="section-label">Contact</p>
                 <h3 class="card-title">${escapeHtml(conference.contact?.contactName || 'Conference contact')}</h3>
                 ${conference.contact?.department ? `<p>${escapeHtml(conference.contact.department)}</p>` : ''}
@@ -422,8 +449,8 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
               </article>
 
               <article class="card speaker-banner">
-                <p class="section-label">Speaker Source</p>
-                <h3 class="card-title">External speaker source configured</h3>
+                <p class="section-label">Faculty Source</p>
+                <h3 class="card-title">External speaker feed</h3>
                 <p>
                   Provider: ${escapeHtml(conference.speakerSource?.provider || 'External provider')}
                   ${conference.speakerSource?.eventId ? `<br />Event ID: ${escapeHtml(conference.speakerSource.eventId)}` : ''}
