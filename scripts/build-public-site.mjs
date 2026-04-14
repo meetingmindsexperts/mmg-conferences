@@ -10,7 +10,6 @@ const publicStylesPath = path.join(docsDir, 'styles.css')
 const PROJECT_ID = 'cfy1tt5s'
 const DATASET = 'production'
 const API_VERSION = '2025-02-07'
-const DEFAULT_BASE_URL = 'https://meetingmindsexperts.github.io/mmg-conferences'
 const BASE_QUERY_URL = `https://${PROJECT_ID}.api.sanity.io/v${API_VERSION}/data/query/${DATASET}`
 
 async function fetchQuery(query, params = {}) {
@@ -78,8 +77,17 @@ function formatDateRange(dateRange) {
 }
 
 function normalizeBaseUrl(siteUrl) {
-  if (!siteUrl) return DEFAULT_BASE_URL
+  if (!siteUrl) return ''
   return siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl
+}
+
+function buildSitePath(pathname = '/') {
+  if (!pathname.startsWith('/')) return `/${pathname}`
+  return pathname
+}
+
+function buildAbsoluteUrl(baseUrl, pathname = '/') {
+  return baseUrl ? `${baseUrl}${buildSitePath(pathname)}` : ''
 }
 
 function buildSeo(conference, siteSettings, pageUrl) {
@@ -96,7 +104,7 @@ function buildSeo(conference, siteSettings, pageUrl) {
   const ogTitle = pageSeo.ogTitle || defaultSeo.ogTitle || title
   const ogDescription = pageSeo.ogDescription || defaultSeo.ogDescription || description
   const ogImage = pageSeo.ogImage?.url || defaultSeo.ogImage?.url || conference?.heroBanner?.url || ''
-  const canonicalUrl = pageSeo.canonicalUrl || pageUrl
+  const canonicalUrl = pageSeo.canonicalUrl || pageUrl || ''
   const noIndex = Boolean(pageSeo.noIndex || defaultSeo.noIndex)
   const keywords = [...(defaultSeo.keywords || []), ...(pageSeo.keywords || [])]
     .filter(Boolean)
@@ -149,7 +157,7 @@ function buildOrganizationSchema(siteSettings, baseUrl) {
     '@type': 'Organization',
     name: siteSettings.organizationName || siteSettings.siteTitle,
     description: siteSettings.organizationDescription || siteSettings.siteDescription || undefined,
-    url: baseUrl,
+    url: baseUrl || undefined,
     logo: siteSettings.organizationLogo?.url || undefined,
     sameAs: siteSettings.sameAsUrls?.length ? siteSettings.sameAsUrls : undefined,
   }
@@ -169,7 +177,7 @@ function buildEventSchema(conference, pageUrl, siteSettings) {
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
     image: conference.seo?.ogImage?.url || conference.heroBanner?.url || undefined,
-    url: pageUrl,
+    url: pageUrl || undefined,
     location: conference.venue?.name
       ? {
           '@type': 'Place',
@@ -194,6 +202,20 @@ function buildEventSchema(conference, pageUrl, siteSettings) {
 }
 
 function layout({title, meta, bodyClass = '', headExtra = '', bodyStart = '', content = '', bodyEnd = ''}) {
+  const runtimeUrlScript =
+    !meta.canonicalUrl
+      ? `
+    <script>
+      (function () {
+        var currentUrl = window.location.origin + window.location.pathname;
+        var canonical = document.querySelector('[data-runtime-canonical]');
+        var ogUrl = document.querySelector('[data-runtime-og-url]');
+        if (canonical) canonical.setAttribute('href', currentUrl);
+        if (ogUrl) ogUrl.setAttribute('content', currentUrl);
+      })();
+    </script>`
+      : ''
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -201,13 +223,13 @@ function layout({title, meta, bodyClass = '', headExtra = '', bodyStart = '', co
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(meta.description || '')}" />
-    <link rel="canonical" href="${escapeHtml(meta.canonicalUrl || '')}" />
+    <link rel="canonical" ${meta.canonicalUrl ? `href="${escapeHtml(meta.canonicalUrl)}"` : 'href="" data-runtime-canonical="true"'} />
     ${meta.noIndex ? '<meta name="robots" content="noindex,nofollow" />' : '<meta name="robots" content="index,follow,max-image-preview:large" />'}
     ${meta.keywords ? `<meta name="keywords" content="${escapeHtml(meta.keywords)}" />` : ''}
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtml(meta.ogTitle || title)}" />
     <meta property="og:description" content="${escapeHtml(meta.ogDescription || meta.description || '')}" />
-    <meta property="og:url" content="${escapeHtml(meta.canonicalUrl || '')}" />
+    <meta property="og:url" ${meta.canonicalUrl ? `content="${escapeHtml(meta.canonicalUrl)}"` : 'content="" data-runtime-og-url="true"'} />
     ${meta.ogImage ? `<meta property="og:image" content="${escapeHtml(meta.ogImage)}" />` : ''}
     <meta name="twitter:card" content="${meta.ogImage ? 'summary_large_image' : 'summary'}" />
     <meta name="twitter:title" content="${escapeHtml(meta.ogTitle || title)}" />
@@ -217,6 +239,7 @@ function layout({title, meta, bodyClass = '', headExtra = '', bodyStart = '', co
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="${bodyClass.includes('conference-page') ? '../../styles.css' : './styles.css'}" />
+    ${runtimeUrlScript}
     ${headExtra}
   </head>
   <body class="${bodyClass}">
@@ -252,7 +275,8 @@ function renderSection(sectionLabel, title, description, ctaUrl, ctaLabel) {
 }
 
 function renderConferencePage(conference, siteSettings, baseUrl) {
-  const pageUrl = `${baseUrl}/conferences/${conference.slug}/`
+  const pagePath = `/conferences/${conference.slug}/`
+  const pageUrl = buildAbsoluteUrl(baseUrl, pagePath)
   const seo = buildSeo(conference, siteSettings, pageUrl)
   const organizationSchema = buildOrganizationSchema(siteSettings, baseUrl)
   const eventSchema = buildEventSchema(conference, pageUrl, siteSettings)
@@ -277,7 +301,7 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
     content: `
       <div class="shell">
         <header class="site-header">
-          <a class="brand" href="${baseUrl}/">${escapeHtml(siteSettings.siteTitle || 'MMG Conferences')}</a>
+          <a class="brand" href="/">${escapeHtml(siteSettings.siteTitle || 'MMG Conferences')}</a>
           <div class="header-copy">
             <p>${escapeHtml(siteSettings.siteDescription || 'Conference landing pages powered by Sanity')}</p>
           </div>
@@ -413,7 +437,7 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
 }
 
 function renderIndexPage(conferences, siteSettings, baseUrl) {
-  const seo = buildSeo({}, siteSettings, `${baseUrl}/`)
+  const seo = buildSeo({}, siteSettings, buildAbsoluteUrl(baseUrl, '/'))
   const organizationSchema = buildOrganizationSchema(siteSettings, baseUrl)
   const headScripts = (siteSettings.headScripts || []).map(renderScriptTag).join('\n')
   const bodyStartScripts = (siteSettings.bodyStartScripts || []).map(renderScriptTag).join('\n')
@@ -428,7 +452,7 @@ function renderIndexPage(conferences, siteSettings, baseUrl) {
         seo.description ||
         siteSettings.siteDescription ||
         'Browse conference landing pages powered by Sanity.',
-      canonicalUrl: `${baseUrl}/`,
+      canonicalUrl: buildAbsoluteUrl(baseUrl, '/'),
     },
     headExtra: `
       ${renderAnalytics(siteSettings.googleAnalyticsMeasurementId)}
@@ -440,7 +464,7 @@ function renderIndexPage(conferences, siteSettings, baseUrl) {
     content: `
       <div class="shell">
         <header class="site-header">
-          <a class="brand" href="${baseUrl}/">${escapeHtml(siteSettings.siteTitle || 'MMG Conferences')}</a>
+          <a class="brand" href="/">${escapeHtml(siteSettings.siteTitle || 'MMG Conferences')}</a>
           <div class="header-copy">
             <p>${escapeHtml(siteSettings.siteDescription || 'Conference landing pages powered by Sanity')}</p>
           </div>
@@ -458,7 +482,7 @@ function renderIndexPage(conferences, siteSettings, baseUrl) {
                     <article class="conference-card">
                       <h3>${escapeHtml(conference.title || 'Untitled conference')}</h3>
                       <p>${escapeHtml(formatDateRange(conference.dateRange) || 'Date coming soon')}</p>
-                      <a href="${baseUrl}/conferences/${escapeHtml(conference.slug)}/">Open landing page</a>
+                      <a href="/conferences/${escapeHtml(conference.slug)}/">Open landing page</a>
                     </article>
                   `,
                 )
@@ -559,7 +583,7 @@ async function generate() {
   const siteSettings = siteSettingsRaw || {
     siteTitle: 'MMG Conferences',
     siteDescription: 'Conference landing pages powered by Sanity',
-    siteUrl: DEFAULT_BASE_URL,
+    siteUrl: '',
     defaultSeo: {},
     headScripts: [],
     bodyStartScripts: [],
@@ -586,24 +610,26 @@ async function generate() {
     )
   }
 
-  const sitemapEntries = [
-    `${baseUrl}/`,
-    ...conferences.map((conference) => `${baseUrl}/conferences/${conference.slug}/`),
-  ]
+  if (baseUrl) {
+    const sitemapEntries = [
+      buildAbsoluteUrl(baseUrl, '/'),
+      ...conferences.map((conference) => buildAbsoluteUrl(baseUrl, `/conferences/${conference.slug}/`)),
+    ]
 
-  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemapEntries.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join('\n')}
 </urlset>`
-  await writeFile(path.join(docsDir, 'sitemap.xml'), sitemapXml)
-  await writeFile(
-    path.join(docsDir, 'robots.txt'),
-    `User-agent: *\nAllow: /\n\nSitemap: ${baseUrl}/sitemap.xml\n`,
-  )
+    await writeFile(path.join(docsDir, 'sitemap.xml'), sitemapXml)
+    await writeFile(
+      path.join(docsDir, 'robots.txt'),
+      `User-agent: *\nAllow: /\n\nSitemap: ${baseUrl}/sitemap.xml\n`,
+    )
 
-  const hostname = new URL(baseUrl).hostname
-  if (!hostname.endsWith('github.io')) {
-    await writeFile(path.join(docsDir, 'CNAME'), `${hostname}\n`)
+    const hostname = new URL(baseUrl).hostname
+    if (!hostname.endsWith('github.io')) {
+      await writeFile(path.join(docsDir, 'CNAME'), `${hostname}\n`)
+    }
   }
 }
 
