@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "sanity build",
+    "build:public-site": "node scripts/build-public-site.mjs",
     "deploy": "sanity deploy",
     "deploy-graphql": "sanity graphql deploy",
     "dev": "sanity dev",

@@ -9,6 +9,7 @@ export const conferenceType = defineType({
     {name: 'content', title: 'Content'},
     {name: 'links', title: 'External Links'},
     {name: 'logistics', title: 'Logistics'},
+    {name: 'seo', title: 'SEO'},
   ],
   fields: [
     defineField({
@@ -208,6 +209,12 @@ export const conferenceType = defineType({
       type: 'contactDetails',
       group: 'logistics',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Social Sharing',
+      type: 'seoSettings',
+      group: 'seo',
     }),
   ],
   preview: {

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://meetingmindsexperts.github.io/mmg-conferences/sitemap.xml
