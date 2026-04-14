@@ -59,11 +59,12 @@ type ConferencePreviewDocument = Partial<SanityDocument> & {
     ctaLabel?: string
   }
   venue?: {
+    title?: string
+    description?: string
     name?: string
     address?: string
-    city?: string
-    country?: string
     mapUrl?: string
+    ctaLabel?: string
   }
   contact?: {
     contactName?: string
@@ -73,9 +74,12 @@ type ConferencePreviewDocument = Partial<SanityDocument> & {
     notes?: string
   }
   speakerSource?: {
+    title?: string
+    description?: string
     provider?: string
     feedUrl?: string
     eventId?: string
+    ctaLabel?: string
   }
 }
 
@@ -96,36 +100,39 @@ function assetRefToUrl(assetRef: string | undefined, projectId: string, dataset:
   return `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${extension}`
 }
 
-function LinkCard({
+function SectionCard({
+  sectionLabel,
   title,
   description,
-  url,
+  ctaUrl,
   ctaLabel,
 }: {
+  sectionLabel: string
   title?: string
   description?: string
-  url?: string
+  ctaUrl?: string
   ctaLabel?: string
 }) {
-  if (!title && !description && !url) return null
+  if (!title && !description && !ctaUrl) return null
 
   return (
     <Card padding={4} radius={4} border style={{background: '#fffdf6', borderColor: '#d9c8a9'}}>
       <Stack space={3}>
         <Text size={1} weight="semibold" style={{textTransform: 'uppercase', letterSpacing: '0.08em'}}>
-          {title}
+          {sectionLabel}
         </Text>
+        {title ? (
+          <Heading size={2} style={{fontSize: '2rem', lineHeight: 1}}>
+            {title}
+          </Heading>
+        ) : null}
         {description ? <Text size={2}>{description}</Text> : null}
-        {url ? (
+        {ctaUrl ? (
           <a
-            href={url}
+            href={ctaUrl}
             target="_blank"
             rel="noreferrer"
-            style={{
-              color: '#0d5c63',
-              fontWeight: 700,
-              textDecoration: 'none',
-            }}
+            style={{color: '#0d5c63', fontWeight: 700, textDecoration: 'none'}}
           >
             {ctaLabel || 'Open link'}
           </a>
@@ -255,10 +262,41 @@ export function ConferenceLandingPreview(props: {
               </Card>
             ) : null}
 
-            <Grid columns={[1, 1, 2]} gap={4}>
-              <LinkCard {...displayed.program} />
-              <LinkCard {...displayed.registration} />
-            </Grid>
+            <SectionCard
+              sectionLabel="Program"
+              title={displayed.program?.title || 'Program'}
+              description={displayed.program?.description}
+              ctaUrl={displayed.program?.url}
+              ctaLabel={displayed.program?.ctaLabel}
+            />
+
+            <SectionCard
+              sectionLabel="Speakers"
+              title={displayed.speakerSource?.title || 'Speakers'}
+              description={displayed.speakerSource?.description}
+              ctaUrl={displayed.speakerSource?.feedUrl}
+              ctaLabel={displayed.speakerSource?.ctaLabel}
+            />
+
+            <SectionCard
+              sectionLabel="Register"
+              title={displayed.registration?.title || 'Register'}
+              description={displayed.registration?.description}
+              ctaUrl={displayed.registration?.url}
+              ctaLabel={displayed.registration?.ctaLabel}
+            />
+
+            <SectionCard
+              sectionLabel="Venue"
+              title={displayed.venue?.title || displayed.venue?.name || 'Venue'}
+              description={
+                displayed.venue?.description ||
+                displayed.venue?.address ||
+                'Add venue details to show them here.'
+              }
+              ctaUrl={displayed.venue?.mapUrl}
+              ctaLabel={displayed.venue?.ctaLabel}
+            />
 
             {(organizingCommittee.length > 0 || scientificCommittee.length > 0) && (
               <Stack space={4}>
@@ -337,11 +375,7 @@ export function ConferenceLandingPreview(props: {
                   <Text size={2} weight="semibold">
                     {displayed.venue?.name || 'Venue name'}
                   </Text>
-                  <Text size={1}>
-                    {[displayed.venue?.address, displayed.venue?.city, displayed.venue?.country]
-                      .filter(Boolean)
-                      .join(', ') || 'Add venue details to show them here.'}
-                  </Text>
+                  <Text size={1}>{displayed.venue?.address || 'Add venue details to show them here.'}</Text>
                   {displayed.venue?.mapUrl ? (
                     <a
                       href={displayed.venue.mapUrl}
@@ -349,53 +383,43 @@ export function ConferenceLandingPreview(props: {
                       rel="noreferrer"
                       style={{color: '#0d5c63', fontWeight: 700, textDecoration: 'none'}}
                     >
-                      View map
+                      {displayed.venue?.ctaLabel || 'View map'}
                     </a>
                   ) : null}
                 </Stack>
               </Card>
-
-              <Card padding={4} radius={4} border style={{background: '#fffdf6', borderColor: '#d9c8a9'}}>
-                <Stack space={3}>
-                  <Text size={1} weight="semibold" style={{textTransform: 'uppercase', letterSpacing: '0.08em'}}>
-                    Contact
-                  </Text>
-                  {displayed.contact?.contactName ? (
-                    <Text size={2} weight="semibold">
-                      {displayed.contact.contactName}
-                    </Text>
-                  ) : null}
-                  <Stack space={2}>
-                    {displayed.contact?.department ? <Text size={1}>{displayed.contact.department}</Text> : null}
-                    {displayed.contact?.email ? <Text size={1}>{displayed.contact.email}</Text> : null}
-                    {displayed.contact?.phone ? <Text size={1}>{displayed.contact.phone}</Text> : null}
-                    {displayed.contact?.notes ? <Text size={1}>{displayed.contact.notes}</Text> : null}
-                  </Stack>
-                </Stack>
-              </Card>
             </Grid>
+
+            <Card padding={4} radius={4} border style={{background: '#fffdf6', borderColor: '#d9c8a9'}}>
+              <Stack space={3}>
+                <Text size={1} weight="semibold" style={{textTransform: 'uppercase', letterSpacing: '0.08em'}}>
+                  Contact
+                </Text>
+                {displayed.contact?.contactName ? (
+                  <Text size={2} weight="semibold">
+                    {displayed.contact.contactName}
+                  </Text>
+                ) : null}
+                <Stack space={2}>
+                  {displayed.contact?.department ? <Text size={1}>{displayed.contact.department}</Text> : null}
+                  {displayed.contact?.email ? <Text size={1}>{displayed.contact.email}</Text> : null}
+                  {displayed.contact?.phone ? <Text size={1}>{displayed.contact.phone}</Text> : null}
+                  {displayed.contact?.notes ? <Text size={1}>{displayed.contact.notes}</Text> : null}
+                </Stack>
+              </Stack>
+            </Card>
 
             <Card padding={4} radius={4} border style={{background: '#10363f', color: '#f4efe6'}}>
               <Flex align="center" justify="space-between" wrap="wrap" gap={4}>
                 <Stack space={2}>
                   <Text size={1} weight="semibold" style={{textTransform: 'uppercase', letterSpacing: '0.08em'}}>
-                    Speaker Source
+                    Speaker Source Details
                   </Text>
                   <Text size={1}>
                     {displayed.speakerSource?.provider || 'No provider selected'}
                     {displayed.speakerSource?.eventId ? ` • Event ID: ${displayed.speakerSource.eventId}` : ''}
                   </Text>
                 </Stack>
-                {displayed.speakerSource?.feedUrl ? (
-                  <a
-                    href={displayed.speakerSource.feedUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{color: '#ffd166', fontWeight: 700, textDecoration: 'none'}}
-                  >
-                    View speaker feed
-                  </a>
-                ) : null}
               </Flex>
             </Card>
           </Stack>

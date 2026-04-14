@@ -238,6 +238,19 @@ function renderCommitteeMember(member) {
   `
 }
 
+function renderSection(sectionLabel, title, description, ctaUrl, ctaLabel) {
+  if (!title && !description && !ctaUrl) return ''
+
+  return `
+    <article class="card action-card">
+      <p class="section-label">${escapeHtml(sectionLabel)}</p>
+      <h3 class="card-title">${escapeHtml(title || sectionLabel)}</h3>
+      ${description ? `<p>${escapeHtml(description)}</p>` : ''}
+      ${ctaUrl ? `<a class="action-link" href="${escapeHtml(ctaUrl)}" target="_blank" rel="noreferrer">${escapeHtml(ctaLabel || 'Open link')}</a>` : ''}
+    </article>
+  `
+}
+
 function renderConferencePage(conference, siteSettings, baseUrl) {
   const pageUrl = `${baseUrl}/conferences/${conference.slug}/`
   const seo = buildSeo(conference, siteSettings, pageUrl)
@@ -303,36 +316,37 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                   : ''
               }
 
-              <section class="action-grid">
-                ${
-                  conference.program?.url
-                    ? `
-                      <article class="card action-card">
-                        <p class="section-label">${escapeHtml(conference.program.title || 'Program')}</p>
-                        <h3 class="card-title">Program</h3>
-                        <p>${escapeHtml(conference.program.description || 'View the latest scientific agenda, sessions, and schedule details.')}</p>
-                        <a class="action-link" href="${escapeHtml(conference.program.url)}" target="_blank" rel="noreferrer">
-                          ${escapeHtml(conference.program.ctaLabel || 'View program')}
-                        </a>
-                      </article>
-                    `
-                    : ''
-                }
-                ${
-                  conference.registration?.url
-                    ? `
-                      <article class="card action-card">
-                        <p class="section-label">${escapeHtml(conference.registration.title || 'Register')}</p>
-                        <h3 class="card-title">Registration</h3>
-                        <p>${escapeHtml(conference.registration.description || 'Secure your place and access registration details through the official external registration page.')}</p>
-                        <a class="action-link" href="${escapeHtml(conference.registration.url)}" target="_blank" rel="noreferrer">
-                          ${escapeHtml(conference.registration.ctaLabel || 'Register now')}
-                        </a>
-                      </article>
-                    `
-                    : ''
-                }
-              </section>
+              ${renderSection(
+                'Program',
+                conference.program?.title || 'Program',
+                conference.program?.description || 'View the latest scientific agenda, sessions, and schedule details.',
+                conference.program?.url,
+                conference.program?.ctaLabel || 'View program',
+              )}
+
+              ${renderSection(
+                'Speakers',
+                conference.speakerSource?.title || 'Speakers',
+                conference.speakerSource?.description || 'Discover the current speaker line-up and access the latest speaker information.',
+                conference.speakerSource?.feedUrl,
+                conference.speakerSource?.ctaLabel || 'View speakers',
+              )}
+
+              ${renderSection(
+                'Register',
+                conference.registration?.title || 'Register',
+                conference.registration?.description || 'Secure your place and access registration details through the official external registration page.',
+                conference.registration?.url,
+                conference.registration?.ctaLabel || 'Register now',
+              )}
+
+              ${renderSection(
+                'Venue',
+                conference.venue?.title || conference.venue?.name || 'Venue',
+                conference.venue?.description || conference.venue?.address || 'Venue details will be announced soon.',
+                conference.venue?.mapUrl,
+                conference.venue?.ctaLabel || 'View map',
+              )}
 
               ${
                 organizingCommittee.length || scientificCommittee.length
@@ -374,13 +388,6 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
 
             <aside class="stack">
               <article class="card">
-                <p class="section-label">Venue</p>
-                <h3 class="card-title">${escapeHtml(conference.venue?.name || 'Venue details')}</h3>
-                <p>${escapeHtml(conference.venue?.address || 'Venue details will be announced soon.')}</p>
-                ${conference.venue?.mapUrl ? `<a class="meta-link" href="${escapeHtml(conference.venue.mapUrl)}" target="_blank" rel="noreferrer">View map</a>` : ''}
-              </article>
-
-              <article class="card">
                 <p class="section-label">Contact</p>
                 <h3 class="card-title">${escapeHtml(conference.contact?.contactName || 'Conference contact')}</h3>
                 ${conference.contact?.department ? `<p>${escapeHtml(conference.contact.department)}</p>` : ''}
@@ -389,23 +396,14 @@ function renderConferencePage(conference, siteSettings, baseUrl) {
                 ${conference.contact?.notes ? `<p>${escapeHtml(conference.contact.notes)}</p>` : ''}
               </article>
 
-              ${
-                conference.speakerSource?.feedUrl
-                  ? `
-                    <article class="card speaker-banner">
-                      <p class="section-label">Speakers</p>
-                      <h3 class="card-title">External speaker source configured</h3>
-                      <p>
-                        Provider: ${escapeHtml(conference.speakerSource.provider || 'External provider')}
-                        ${conference.speakerSource.eventId ? `<br />Event ID: ${escapeHtml(conference.speakerSource.eventId)}` : ''}
-                      </p>
-                      <a class="meta-link" href="${escapeHtml(conference.speakerSource.feedUrl)}" target="_blank" rel="noreferrer">
-                        View speaker source
-                      </a>
-                    </article>
-                  `
-                  : ''
-              }
+              <article class="card speaker-banner">
+                <p class="section-label">Speaker Source</p>
+                <h3 class="card-title">External speaker source configured</h3>
+                <p>
+                  Provider: ${escapeHtml(conference.speakerSource?.provider || 'External provider')}
+                  ${conference.speakerSource?.eventId ? `<br />Event ID: ${escapeHtml(conference.speakerSource.eventId)}` : ''}
+                </p>
+              </article>
             </aside>
           </section>
         </main>

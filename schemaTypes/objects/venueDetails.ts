@@ -6,6 +6,20 @@ export const venueDetailsType = defineType({
   type: 'object',
   fields: [
     defineField({
+      name: 'title',
+      title: 'Section Title',
+      type: 'string',
+      initialValue: 'Venue',
+      validation: (rule) => rule.max(80),
+    }),
+    defineField({
+      name: 'description',
+      title: 'Section Description',
+      type: 'text',
+      rows: 3,
+      validation: (rule) => rule.max(280),
+    }),
+    defineField({
       name: 'name',
       title: 'Venue Name',
       type: 'string',
@@ -23,6 +37,13 @@ export const venueDetailsType = defineType({
       title: 'Map URL',
       type: 'url',
       validation: (rule) => rule.uri({allowRelative: false, scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'ctaLabel',
+      title: 'CTA Label',
+      type: 'string',
+      initialValue: 'View map',
+      validation: (rule) => rule.max(40),
     }),
   ],
 })

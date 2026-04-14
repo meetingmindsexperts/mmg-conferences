@@ -169,8 +169,11 @@ export const conferenceType = defineType({
       type: 'externalDataSource',
       group: 'links',
       initialValue: {
+        title: 'Speakers',
+        description: 'Discover the current speaker line-up and access the latest speaker information.',
         provider: 'eventsAir',
         entityType: 'speakers',
+        ctaLabel: 'View speakers',
       },
       validation: (rule) => rule.required(),
     }),

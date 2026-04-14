@@ -6,6 +6,19 @@ export const externalDataSourceType = defineType({
   type: 'object',
   fields: [
     defineField({
+      name: 'title',
+      title: 'Section Title',
+      type: 'string',
+      validation: (rule) => rule.max(80),
+    }),
+    defineField({
+      name: 'description',
+      title: 'Section Description',
+      type: 'text',
+      rows: 3,
+      validation: (rule) => rule.max(280),
+    }),
+    defineField({
       name: 'provider',
       title: 'Provider',
       type: 'string',
@@ -22,10 +35,17 @@ export const externalDataSourceType = defineType({
     }),
     defineField({
       name: 'feedUrl',
-      title: 'Feed or API URL',
-      description: 'The external endpoint your frontend or integration service will use to fetch data.',
+      title: 'CTA URL',
+      description: 'The external endpoint or landing page your frontend should send users to.',
       type: 'url',
       validation: (rule) => rule.required().uri({allowRelative: false, scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'ctaLabel',
+      title: 'CTA Label',
+      type: 'string',
+      initialValue: 'View speakers',
+      validation: (rule) => rule.max(40),
     }),
     defineField({
       name: 'eventId',
