@@ -10,6 +10,7 @@ const publicStylesPath = path.join(docsDir, 'styles.css')
 const PROJECT_ID = 'cfy1tt5s'
 const DATASET = 'production'
 const API_VERSION = '2025-02-07'
+const DEFAULT_BASE_URL = 'https://mmg-conferences.vercel.app'
 const BASE_QUERY_URL = `https://${PROJECT_ID}.api.sanity.io/v${API_VERSION}/data/query/${DATASET}`
 
 async function fetchQuery(query, params = {}) {
@@ -77,7 +78,7 @@ function formatDateRange(dateRange) {
 }
 
 function normalizeBaseUrl(siteUrl) {
-  if (!siteUrl) return ''
+  if (!siteUrl) return DEFAULT_BASE_URL
   return siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl
 }
 
